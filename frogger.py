@@ -60,9 +60,26 @@ frog_image = pygame.image.load("frog.png")
 vehicles = pygame.sprite.Group()
 
 bus = Sprite(bus_image)
-bus.center = (WIDTH / 2, 186)
+bus.center = (0, 186)
 bus.speed = 1
 bus.add(all_sprites, vehicles)
+
+car = Sprite(car_image)
+car.center = (WIDTH, 140)
+car.speed = 2
+car.add(all_sprites, vehicles)
+car.direction = 180
+
+cruiser = Sprite(cruiser_image)
+cruiser.center = (WIDTH, 290)
+cruiser.speed = 1.5
+cruiser.add(all_sprites, vehicles)
+cruiser.direction = 180
+
+taxi = Sprite(taxi_image)
+taxi.center = (0, 340)
+taxi.speed = 1.8
+taxi.add(all_sprites, vehicles)
 
 # Sprite which displays the time remaining
 baloo_font_small = pygame.font.Font("Baloo.ttf", 36)
@@ -76,11 +93,23 @@ baloo_font_large = pygame.font.Font("Baloo.ttf", 72)
 game_over = Sprite(baloo_font_large.render("GAME OVER", True, GAME_OVER_COLOR))
 game_over.center = (WIDTH / 2, HEIGHT / 2)
 
+# Create a timer for the countdown clock
+COUNTDOWN = pygame.event.custom_type()
+pygame.time.set_timer(COUNTDOWN, 1000, time_left)
+
 
 ### DEFINE HELPER FUNCTIONS
+leave = Sprite(exit_button_image)
+leave.center = (WIDTH / 1.4, 450)
+leave.add(all_sprites)
 
+start = Sprite(start_button_image)
+start.center = (WIDTH / 4, 450)
+start.add(all_sprites)
 
-
+pause = Sprite(pause_button_image)
+pause.center = (WIDTH / 4, 450)
+pause.add(all_sprites)
 # Main Loop
 running = True
 while running:
@@ -93,11 +122,18 @@ while running:
             running = False
 
         ### MANAGE OTHER EVENTS SINCE THE LAST FRAME
-        
+             
+        elif event.type == COUNTDOWN:
+            time_left -= 1
+            timer.image = baloo_font_small.render(f"{time_left}", True, FONT_COLOR)
 
 
     ### MANAGE GAME STATE FRAME-BY-FRAME
-    
+    for vehicle in vehicles:
+         if vehicle.left > WIDTH:
+             vehicle.right = 0
+         elif vehicle.right < 0:
+             vehicle.left = WIDTH 
     
 
     # Update the sprites' locations
