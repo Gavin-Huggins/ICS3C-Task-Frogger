@@ -16,7 +16,8 @@ HEIGHT = 480
 BACKGROUND_COLOR = "#444444"
 FONT_COLOR = "#6aa84f"
 GAME_OVER_COLOR = "crimson"
-START_TIME = 30
+PAUSED_COLOR = "gold"
+START_TIME = 10
 
 # Create and open a pygame screen with the given size
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -56,30 +57,24 @@ taxi_image = pygame.transform.rotozoom(taxi_image, 0, 0.3)
 frog_image = pygame.image.load("frog.png")
 
 
+
 # Sprites for the vehicles
 vehicles = pygame.sprite.Group()
 
 bus = Sprite(bus_image)
 bus.center = (0, 186)
-bus.speed = 1
-bus.add(all_sprites, vehicles)
 
 car = Sprite(car_image)
 car.center = (WIDTH, 140)
-car.speed = 2
-car.add(all_sprites, vehicles)
-car.direction = 180
+
 
 cruiser = Sprite(cruiser_image)
 cruiser.center = (WIDTH, 290)
-cruiser.speed = 1.5
-cruiser.add(all_sprites, vehicles)
-cruiser.direction = 180
+
 
 taxi = Sprite(taxi_image)
 taxi.center = (0, 340)
-taxi.speed = 1.8
-taxi.add(all_sprites, vehicles)
+
 
 # Sprite which displays the time remaining
 baloo_font_small = pygame.font.Font("Baloo.ttf", 36)
@@ -93,9 +88,11 @@ baloo_font_large = pygame.font.Font("Baloo.ttf", 72)
 game_over = Sprite(baloo_font_large.render("GAME OVER", True, GAME_OVER_COLOR))
 game_over.center = (WIDTH / 2, HEIGHT / 2)
 
+paused = Sprite(baloo_font_large.render("PAUSED", True, PAUSED_COLOR))
+paused.center = (WIDTH / 2, HEIGHT / 2)
 # Create a timer for the countdown clock
 COUNTDOWN = pygame.event.custom_type()
-pygame.time.set_timer(COUNTDOWN, 1000, time_left)
+
 
 
 ### DEFINE HELPER FUNCTIONS
@@ -104,12 +101,12 @@ leave.center = (WIDTH / 1.4, 450)
 leave.add(all_sprites)
 
 start = Sprite(start_button_image)
-start.center = (WIDTH / 4, 450)
+start.center = (WIDTH / 5.2, 450)
 start.add(all_sprites)
 
 pause = Sprite(pause_button_image)
-pause.center = (WIDTH / 4, 450)
-pause.add(all_sprites)
+pause.center = (WIDTH / 3, 450)
+
 # Main Loop
 running = True
 while running:
@@ -126,14 +123,53 @@ while running:
         elif event.type == COUNTDOWN:
             time_left -= 1
             timer.image = baloo_font_small.render(f"{time_left}", True, FONT_COLOR)
-
-
+            timer.center = (2 * WIDTH / 3, 30)
+            
+            if time_left == 0:
+                game_over.add(all_sprites)
+                for vehicle in vehicles:
+                    vehicle.kill()
+                pause.kill()
+                start.add(all_sprites)
+        elif event.type == MOUSEBUTTONDOWN:
+            if leave.mask_contains_point(event.pos):
+                running = False
+                
+            if start.mask_contains_point(event.pos):
+                if time_left == 0:
+                    time_left = START_TIME
+                    timer.image = baloo_font_small.render(f"{time_left}", True, FONT_COLOR)
+                    timer.center = (2 * WIDTH / 3, 30)
+                    game_over.kill()
+                
+                taxi.speed = 7
+                taxi.add(all_sprites, vehicles)
+                cruiser.speed = 3
+                cruiser.add(all_sprites, vehicles)
+                cruiser.direction = 180
+                car.speed = 5
+                car.add(all_sprites, vehicles)
+                car.direction = 180
+                bus.speed = 10
+                bus.add(all_sprites, vehicles)
+                pygame.time.set_timer(COUNTDOWN, 1000, time_left)
+                start.kill()
+                paused.kill()
+                pause.add(all_sprites)
+            if pause.mask_contains_point(event.pos):
+                for vehicle in vehicles:
+                    vehicle.kill()
+                #frog.kill()
+                pause.kill()
+                paused.add(all_sprites)
+                start.add(all_sprites)
+                pygame.time.set_timer(COUNTDOWN, 0)
     ### MANAGE GAME STATE FRAME-BY-FRAME
     for vehicle in vehicles:
-         if vehicle.left > WIDTH:
-             vehicle.right = 0
-         elif vehicle.right < 0:
-             vehicle.left = WIDTH 
+        if vehicle.left > WIDTH:
+            vehicle.right = 0
+        elif vehicle.right < 0:
+            vehicle.left = WIDTH 
     
 
     # Update the sprites' locations
