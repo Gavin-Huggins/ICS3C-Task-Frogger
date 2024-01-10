@@ -75,6 +75,8 @@ cruiser.center = (WIDTH, 290)
 taxi = Sprite(taxi_image)
 taxi.center = (0, 340)
 
+frog = Sprite(frog_image)
+frog.center = (WIDTH / 2, 450)
 
 # Sprite which displays the time remaining
 baloo_font_small = pygame.font.Font("Baloo.ttf", 36)
@@ -131,6 +133,7 @@ while running:
                     vehicle.kill()
                 pause.kill()
                 start.add(all_sprites)
+                frog.kill()
         elif event.type == MOUSEBUTTONDOWN:
             if leave.mask_contains_point(event.pos):
                 running = False
@@ -156,20 +159,33 @@ while running:
                 start.kill()
                 paused.kill()
                 pause.add(all_sprites)
+                frog.add(all_sprites)
             if pause.mask_contains_point(event.pos):
                 for vehicle in vehicles:
                     vehicle.kill()
-                #frog.kill()
+                frog.kill()
                 pause.kill()
                 paused.add(all_sprites)
                 start.add(all_sprites)
                 pygame.time.set_timer(COUNTDOWN, 0)
+                
+    keys = pygame.key.get_pressed()
+    if keys[K_UP] and frog.top > 0:
+        frog.y -= 1
+    if keys[K_DOWN] and frog.bottom < HEIGHT - 60:
+        frog.y += 1
+    if keys[K_LEFT] and frog.left > 0:
+        frog.x -= 1
+    if keys[K_RIGHT] and frog.right < WIDTH:
+        frog.x += 1
     ### MANAGE GAME STATE FRAME-BY-FRAME
     for vehicle in vehicles:
         if vehicle.left > WIDTH:
             vehicle.right = 0
         elif vehicle.right < 0:
-            vehicle.left = WIDTH 
+            vehicle.left = WIDTH
+        # Check when car hits frog
+        
     
 
     # Update the sprites' locations
